@@ -49,6 +49,9 @@ function Shot($name) {
 function Save-Logs($tag) {
   foreach ($f in @((Join-Path $appdata 'programm.log'), (Join-Path $data 'portal.log'))) { if (Test-Path $f) { Copy-Item $f (Join-Path $Out ("$tag-" + (Split-Path $f -Leaf))) -Force } }
 }
+function Show-Windows($tag) { # Texte offener Fenster (auch verdeckter Fehlerfenster) festhalten
+  try { $t = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'fenstertexte.ps1'); $t | Set-Content (Join-Path $Out "$tag-fenstertexte.txt") -Encoding utf8; Write-Host "`n--- Offene Fenster ---"; $t | ForEach-Object { Write-Host $_ } } catch { Write-Host "Fenstertexte: $($_.Exception.Message)" }
+}
 function Show-Logs($tag) { foreach ($f in Get-ChildItem $Out -Filter "$tag-*.log") { Write-Host "`n--- $($f.Name) (Ende) ---"; Get-Content $f.FullName -Tail 30 } }
 
 # Für alle Schritte: Rolle „Hauptrechner“ vorgeben, keine Sicherung, Updates nur vom lokalen Prüf-Server (nicht aus dem Internet)
@@ -91,7 +94,7 @@ try {
     Note ((Installed-Version) -eq $NewVersion) "Installiertes Programm trägt Version $(Installed-Version)"
     $up = Wait-Until { (Portal-Version) -eq $NewVersion } 150
     Note $up "Programm startet nach der Installation von selbst, Portal $NewVersion antwortet"
-    Start-Sleep -Seconds 16; Shot '1-neuinstallation'; Save-Logs '1'
+    Start-Sleep -Seconds 11; Shot '1-neuinstallation'; Start-Sleep -Seconds 6; Save-Logs '1'   # Foto, solange das Nachrichten-Fenster (Test) zu sehen ist
     $plog = Join-Path $Out '1-programm.log'
     if ([version]$NewVersion -ge [version]'1.5.5') {
       $shown = (Test-Path $plog) -and (Select-String -Path $plog -Pattern 'Nachrichten-Fenster gezeigt: sichtbar=true' -Quiet)
@@ -116,7 +119,7 @@ try {
       Save-Logs '2'
       Note $updated "Programm hat sich selbst von $oldVersion auf $NewVersion aktualisiert und läuft wieder (installiert: $(Installed-Version), Portal: $(Portal-Version))"
       Start-Sleep -Seconds 14; Shot '2b-nach-programm-update'
-      if (-not $updated) { Show-Logs '2' }
+      if (-not $updated) { Show-Logs '2'; Show-Windows '2' }
     }
   }
 } catch {
