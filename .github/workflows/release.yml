@@ -29,3 +29,12 @@ jobs:
           else
             gh release create "v$V" "channel/$F" channel/update.json --title "Betriebsportal $V" --notes-file channel/NOTES.md --latest
           fi
+          # Windows-Installer: liegt in Teilen unter channel/installer/ (einzeln zu groß für Git), wird hier zusammengesetzt,
+          # gegen die signierte Prüfsumme geprüft und an die Veröffentlichung seiner Version gehängt.
+          if compgen -G "channel/installer/*.part*" >/dev/null; then
+            SV=$(jq -er .shell.version channel/update.json)
+            SN="Betriebsportal-Setup-$SV.exe"
+            cat $(ls channel/installer/*.part* | sort) > "$RUNNER_TEMP/$SN"
+            [ "$(sha256sum "$RUNNER_TEMP/$SN" | cut -d' ' -f1)" = "$(jq -er .shell.sha256 channel/update.json)" ] || { echo "Prüfsumme des Installers stimmt nicht"; exit 1; }
+            gh release upload "v$SV" "$RUNNER_TEMP/$SN" --clobber
+          fi
