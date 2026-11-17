@@ -56,7 +56,8 @@ Start-Sleep -Seconds 3
 try {
   # ---------- 1. Neuinstallation ----------
   Write-Host "`n=== 1. Neuinstallation von $NewVersion ==="
-  $p = Start-Process -FilePath $NewSetup -ArgumentList '/S' -PassThru -Wait
+  $p = Start-Process -FilePath $NewSetup -ArgumentList '/S' -PassThru
+  if (-not $p.WaitForExit(240000)) { throw 'Der Installer ist nach 4 Minuten nicht fertig' }
   Note ($p.ExitCode -eq 0) "Installer $NewVersion läuft still durch (Rückgabewert $($p.ExitCode))"
   Note ((Installed-Version) -eq $NewVersion) "Installiertes Programm trägt Version $(Installed-Version)"
   $up = Wait-Until { (Portal-Version) -eq $NewVersion } 120
@@ -75,7 +76,8 @@ try {
     Stop-App
     Remove-Item $data, $appdata -Recurse -Force -ErrorAction SilentlyContinue      # frischer Stand, wie bei einem Kunden mit der alten Version
     $env:PORTAL_SHELL_AUTO = '1'; $env:PORTAL_SHELL_DELAY = '10000'                # Rückfrage „Jetzt aktualisieren“ automatisch bestätigen
-    $p = Start-Process -FilePath $OldSetup -ArgumentList '/S' -PassThru -Wait
+    $p = Start-Process -FilePath $OldSetup -ArgumentList '/S' -PassThru
+    if (-not $p.WaitForExit(240000)) { throw 'Der Installer der vorherigen Version ist nach 4 Minuten nicht fertig' }
     Note ((Installed-Version) -eq $oldVersion) "Vorherige Version $oldVersion installiert"
     $oldUp = Wait-Until { $null -ne (Portal-Version) } 120
     Note $oldUp "Vorherige Version läuft"
