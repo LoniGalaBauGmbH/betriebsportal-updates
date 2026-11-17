@@ -1,9 +1,9 @@
 {
-  "version": "1.4.0",
-  "file": "betriebsportal-1.4.0.pkg",
-  "sha256": "a07badfde386d077cea51c4a1de347d664102757c79e1399c26e44e1664e7a2b",
-  "sig": "EkaUSQEEle4b+mWsPygIBKAATaN7sJeqMmzh7TXRpEi0yiSny0XHlnv0VqUD5aRIWIO4fM36UJnIYHSDU6TABg==",
-  "date": "2026-11-17T07:17:49.819Z",
+  "version": "1.5.0",
+  "file": "betriebsportal-1.5.0.pkg",
+  "sha256": "b7ff0a5baa9d5a26ae7923861a5f68d72c3266fa693f1181f00a3fd1cefff6cb",
+  "sig": "rx5La9L6Qx8O1kucLqcWwTotPPzY6FObSBWdUEZjEB5DxiTnGBewWqUmofQaAi7udsrH/pQXkxKMjZrtwpOTDw==",
+  "date": "2026-11-17T09:20:41.776Z",
   "shell": {
     "version": "1.4.0",
     "url": "https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/download/v1.4.0/Betriebsportal-Setup-1.4.0.exe",
