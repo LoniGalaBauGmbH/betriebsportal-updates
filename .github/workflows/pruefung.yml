@@ -1,0 +1,41 @@
+# Probelauf der Windows-Prüfung mit bereits veröffentlichten Versionen (ohne etwas zu veröffentlichen).
+# Auslöser: Änderung an pruefung/auftrag.json, z. B. { "alt": "1.5.3", "neu": "1.5.4" }
+name: Prüfung (Probelauf)
+on:
+  push:
+    branches: [main]
+    paths: ['pruefung/**']
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Versionen laden und auf echtem Windows prüfen
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $a = Get-Content pruefung/auftrag.json -Raw | ConvertFrom-Json
+          $w = Join-Path $env:RUNNER_TEMP 'pruefung'; New-Item -ItemType Directory -Force -Path $w | Out-Null
+          gh release download "v$($a.neu)" --repo $env:GITHUB_REPOSITORY --dir (Join-Path $w 'neu') --pattern 'Betriebsportal-Setup-*.exe' --pattern 'update.json' --pattern '*.pkg'
+          $old = ''
+          if ($a.alt) { gh release download "v$($a.alt)" --repo $env:GITHUB_REPOSITORY --dir (Join-Path $w 'alt') --pattern 'Betriebsportal-Setup-*.exe'; $old = (Get-ChildItem (Join-Path $w 'alt') -Filter '*.exe')[0].FullName }
+          $new = (Get-ChildItem (Join-Path $w 'neu') -Filter '*.exe')[0].FullName
+          $pkg = (Get-ChildItem (Join-Path $w 'neu') -Filter '*.pkg')[0].FullName
+          & .github/pruefung-windows.ps1 -NewSetup $new -NewVersion $a.neu -OldSetup $old -UpdateJson (Join-Path $w 'neu/update.json') -Pkg $pkg -Out (Join-Path $env:RUNNER_TEMP 'ergebnis')
+          exit $LASTEXITCODE
+      - name: Bildschirmfotos und Protokolle ablegen
+        if: always()
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $o = Join-Path $env:RUNNER_TEMP 'ergebnis'
+          if (-not (Test-Path $o)) { exit 0 }
+          gh release view pruefung --repo $env:GITHUB_REPOSITORY 2>$null | Out-Null
+          if ($LASTEXITCODE -ne 0) { gh release create pruefung --repo $env:GITHUB_REPOSITORY --prerelease --title 'Prüfprotokolle (keine Programmversion)' --notes 'Bildschirmfotos und Protokolle der automatischen Prüfungen. Keine Datei für Kunden.' }
+          $files = Get-ChildItem $o -File | ForEach-Object { $n = Join-Path $o ("windows-" + $_.Name); Copy-Item $_.FullName $n; $n }
+          if ($files) { gh release upload pruefung @files --clobber --repo $env:GITHUB_REPOSITORY }
+          exit 0
