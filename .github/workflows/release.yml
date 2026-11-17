@@ -1,60 +1,88 @@
-# Erstellt aus den Dateien in channel/ automatisch eine Veröffentlichung (Release).
+# Veröffentlicht ein Update – aber erst, nachdem es auf einem echten Windows-PC und einem echten Mac geprüft wurde.
+#
+#   windows  installiert, startet und aktualisiert das Programm auf echtem Windows (.github/pruefung-windows.ps1)
+#   mac      baut die Mac-App, signiert sie und startet sie zur Probe
+#   release  läuft NUR, wenn beide Prüfungen bestanden sind, und erstellt die Veröffentlichung
+#
 # Alle installierten Betriebsportale fragen die jeweils neueste Veröffentlichung ab.
-name: Update veröffentlichen
+# Liegt die Datei channel/NUR-PRUEFEN vor, wird geprüft, aber nichts veröffentlicht (Probelauf).
+name: Update prüfen und veröffentlichen
 on:
   push:
     branches: [main]
     paths: ['channel/**']
-  workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
-      - name: Veröffentlichung anlegen oder aktualisieren
+      - name: Auf echtem Windows prüfen
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          V=$(jq -er .version channel/update.json)
-          F=$(jq -er .file channel/update.json)
-          [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Ungültige Version: $V"; exit 1; }
-          [[ "$F" =~ ^[A-Za-z0-9._-]+$ && -f "channel/$F" ]] || { echo "Paketdatei fehlt: $F"; exit 1; }
-          # Prüfsumme des Pakets muss zur Beschreibung passen (Schutz vor halben Uploads)
-          [ "$(sha256sum "channel/$F" | cut -d' ' -f1)" = "$(jq -er .sha256 channel/update.json)" ] || { echo "Prüfsumme stimmt nicht"; exit 1; }
-          if gh release view "v$V" >/dev/null 2>&1; then
-            gh release upload "v$V" "channel/$F" channel/update.json --clobber
-          else
-            gh release create "v$V" "channel/$F" channel/update.json --title "Betriebsportal $V" --notes-file channel/NOTES.md --latest
-          fi
-          # Windows-Installer: liegt in Teilen unter channel/installer/ (einzeln zu groß für Git), wird hier zusammengesetzt,
-          # gegen die signierte Prüfsumme geprüft und an die Veröffentlichung seiner Version gehängt.
-          if compgen -G "channel/installer/*.part*" >/dev/null; then
-            SV=$(jq -er .shell.version channel/update.json)
-            SN="Betriebsportal-Setup-$SV.exe"
-            cat $(ls channel/installer/*.part* | sort) > "$RUNNER_TEMP/$SN"
-            [ "$(sha256sum "$RUNNER_TEMP/$SN" | cut -d' ' -f1)" = "$(jq -er .shell.sha256 channel/update.json)" ] || { echo "Prüfsumme des Installers stimmt nicht"; exit 1; }
-            gh release upload "v$SV" "$RUNNER_TEMP/$SN" --clobber
-          fi
+          $m = Get-Content channel/update.json -Raw | ConvertFrom-Json
+          $pkg = (Resolve-Path (Join-Path 'channel' $m.file)).Path
+          $w = Join-Path $env:RUNNER_TEMP 'pruefung'; New-Item -ItemType Directory -Force -Path $w | Out-Null
+          $out = Join-Path $env:RUNNER_TEMP 'ergebnis'
+          $parts = @(Get-ChildItem 'channel/installer' -Filter '*.part*' -ErrorAction SilentlyContinue | Sort-Object Name)
+          # Veröffentlichte Versionen mit Windows-Installer (ohne Prüfprotokolle und Entwürfe)
+          $rels = gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=50" | ConvertFrom-Json | Where-Object { -not $_.prerelease -and -not $_.draft -and ($_.assets | Where-Object { $_.name -match '^Betriebsportal-Setup-\d+\.\d+\.\d+\.exe$' }) }
+          $vers = @($rels | ForEach-Object { [version]($_.tag_name.TrimStart('v')) } | Sort-Object -Descending)
+          function Get-Setup([version]$v) {
+            $d = Join-Path $w "alt-$v"; gh release download "v$v" --repo $env:GITHUB_REPOSITORY --dir $d --pattern 'Betriebsportal-Setup-*.exe' | Out-Null
+            return (Get-ChildItem $d -Filter '*.exe')[0].FullName
+          }
+          if ($parts.Count -gt 0) {
+            # Neuer Installer: aus den Teilen zusammensetzen, dann volle Prüfung gegen die vorherige veröffentlichte Version
+            $sv = $m.shell.version
+            $new = Join-Path $w "Betriebsportal-Setup-$sv.exe"
+            $o = [IO.File]::Create($new); foreach ($p in $parts) { $i = [IO.File]::OpenRead($p.FullName); $i.CopyTo($o); $i.Dispose() }; $o.Dispose()
+            $prev = $vers | Where-Object { $_ -lt [version]$sv } | Select-Object -First 1
+            $old = ''; if ($prev) { $old = Get-Setup $prev }
+            Write-Host "Volle Prüfung: Programm $sv, vorherige Version: $prev"
+            & .github/pruefung-windows.ps1 -NewSetup $new -NewVersion $sv -OldSetup $old -UpdateJson (Resolve-Path channel/update.json).Path -Pkg $pkg -Out $out
+          } else {
+            # Reines Portal-Update: auf dem zuletzt veröffentlichten Programm einspielen
+            $base = $vers | Select-Object -First 1
+            if (-not $base) { Write-Host 'Noch kein veröffentlichtes Programm – nichts zu prüfen.'; exit 0 }
+            Write-Host "Portal-Prüfung: Portal $($m.version) auf Programm $base"
+            & .github/pruefung-windows.ps1 -PortalOnly -OldSetup (Get-Setup $base) -UpdateJson (Resolve-Path channel/update.json).Path -Pkg $pkg -Out $out
+          }
+          exit $LASTEXITCODE
+      - name: Bildschirmfotos und Protokolle ablegen
+        if: always()
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $o = Join-Path $env:RUNNER_TEMP 'ergebnis'
+          if (-not (Test-Path $o)) { exit 0 }
+          gh release view pruefung --repo $env:GITHUB_REPOSITORY 2>$null | Out-Null
+          if ($LASTEXITCODE -ne 0) { gh release create pruefung --repo $env:GITHUB_REPOSITORY --prerelease --title 'Prüfprotokolle (keine Programmversion)' --notes 'Bildschirmfotos und Protokolle der automatischen Prüfungen. Keine Datei für Kunden.' }
+          $files = @(Get-ChildItem $o -File | ForEach-Object { $n = Join-Path $o ("windows-" + $_.Name); Copy-Item $_.FullName $n; $n })
+          if ($files.Count -gt 0) { gh release upload pruefung @files --clobber --repo $env:GITHUB_REPOSITORY }
+          exit 0
 
-  # Mac-Programm: wird auf einem echten Mac zusammengesetzt, signiert, probeweise gestartet und an die Veröffentlichung gehängt.
+  # Mac-Programm: wird auf einem echten Mac zusammengesetzt, signiert und probeweise gestartet.
   mac:
-    needs: release
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Mac-App bauen, signieren, testen, veröffentlichen
+      - name: Mac-App bauen, signieren und testen
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          [ -f channel/mac/desktop-app.tgz ] || { echo "Kein Mac-Paket in diesem Stand."; exit 0; }
+          mkdir -p "$RUNNER_TEMP/mac-out"
+          [ -f channel/mac/desktop-app.tgz ] || { echo "Kein Mac-Paket in diesem Stand (reines Portal-Update)."; exit 0; }
           V=$(jq -er .version channel/mac/mac.json)
           EV=$(jq -er .electron channel/mac/mac.json)
           [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$EV" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Ungültige Versionsangabe"; exit 1; }
-          if gh release view "v$V" --json assets -q '.assets[].name' | grep -q "Betriebsportal-Mac-AppleChip-$V.zip"; then echo "Mac-App $V ist schon veröffentlicht."; exit 0; fi
           ROOT=$PWD; mkdir -p "$RUNNER_TEMP/work/app" && cd "$RUNNER_TEMP/work"
           tar -xzf "$ROOT/channel/mac/desktop-app.tgz" -C app
           [ "$(jq -er .version app/package.json)" = "$V" ] || { echo "Programmpaket passt nicht zur Version"; exit 1; }
@@ -91,34 +119,91 @@ jobs:
             # Signatur ohne Apple-Entwicklerkonto (ad hoc): nötig, damit die App auf Apple-Chips überhaupt startet
             codesign --force --deep --sign - "$APP"
             codesign --verify --deep --strict "$APP"
-            ditto -c -k --keepParent "$APP" "Betriebsportal-Mac-$NAME-$V.zip"
+            ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/mac-out/Betriebsportal-Mac-$NAME-$V.zip"
           done
 
-          # Probelauf auf diesem Mac: App als Hauptrechner starten und prüfen, ob das Portal antwortet
+          # Probelauf auf diesem Mac: App als Hauptrechner starten, Portal und Nachrichten-Fenster prüfen
           export HOME="$RUNNER_TEMP/home"; mkdir -p "$HOME"
-          PORTAL_AUTOROLE=server PORTAL_NO_BACKUP=1 "out-arm64/Betriebsportal.app/Contents/MacOS/Betriebsportal" > run.log 2>&1 &
+          PORTAL_AUTOROLE=server PORTAL_NO_BACKUP=1 PORTAL_TEST_NOTIFY=1 PORTAL_UPDATE_URL=http://127.0.0.1:9 "out-arm64/Betriebsportal.app/Contents/MacOS/Betriebsportal" > run.log 2>&1 &
           PID=$!
           OK=0; for i in $(seq 1 45); do if curl -sf http://127.0.0.1:3000/api/setup > setup.json; then OK=1; break; fi; sleep 2; done
           cat setup.json 2>/dev/null || true; echo
-          sleep 6; screencapture -x "$RUNNER_TEMP/work/mac-probelauf.png" 2>/dev/null || true
+          sleep 14; screencapture -x "$RUNNER_TEMP/work/mac-probelauf.png" 2>/dev/null || true
+          PLOG="$HOME/Library/Application Support/Betriebsportal/programm.log"
+          cp "$PLOG" "$RUNNER_TEMP/work/mac-programm.log" 2>/dev/null || true
+          FAIL=0
           if [ "$OK" = 1 ]; then
             jq -e --arg v "$V" '.version == $v and .needed == true and .local == true' setup.json
             curl -sf http://127.0.0.1:3000/ | grep -q 'extra.js'
-            curl -sf http://127.0.0.1:3000/api/branding >/dev/null
-            echo "PROBELAUF BESTANDEN: Portal $V läuft in der Mac-App."
-          fi
-          ls -la "$HOME/Betriebsportal-Daten" 2>/dev/null || true
+            echo "[OK] Portal $V läuft in der Mac-App."
+            if grep -q 'Nachrichten-Fenster gezeigt: sichtbar=true' "$PLOG" 2>/dev/null; then echo "[OK] Nachrichten-Fenster wird auf dem Mac angezeigt."; else echo "[FEHLER] Nachrichten-Fenster wurde nicht angezeigt."; FAIL=1; fi
+            if grep -q 'Unerwarteter Fehler' "$PLOG" 2>/dev/null; then echo "[FEHLER] Unerwartete Programmfehler im Protokoll:"; grep 'Unerwarteter Fehler' "$PLOG" | head -5; FAIL=1; fi
+          else FAIL=1; echo "[FEHLER] Die App hat das Portal nicht gestartet."; fi
           kill $PID 2>/dev/null || true; sleep 2
-          tail -40 run.log || true
-          [ "$OK" = 1 ] || { echo "PROBELAUF FEHLGESCHLAGEN: Die App hat das Portal nicht gestartet."; exit 1; }
-
-          gh release upload "v$V" "Betriebsportal-Mac-AppleChip-$V.zip" "Betriebsportal-Mac-Intel-$V.zip" --clobber --repo "$GITHUB_REPOSITORY"
-      - name: Bildschirmfoto und Protokoll des Probelaufs aufbewahren
+          cat "$PLOG" 2>/dev/null | tail -20 || true
+          tail -30 run.log || true
+          [ "$FAIL" = 0 ] || { echo "PROBELAUF NICHT BESTANDEN"; exit 1; }
+          echo "PROBELAUF BESTANDEN"
+      - name: Bildschirmfoto und Protokoll ablegen
         if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/work" 2>/dev/null || exit 0
+          gh release view pruefung --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || gh release create pruefung --repo "$GITHUB_REPOSITORY" --prerelease --title 'Prüfprotokolle (keine Programmversion)' --notes 'Bildschirmfotos und Protokolle der automatischen Prüfungen. Keine Datei für Kunden.' || true
+          for f in mac-probelauf.png mac-programm.log; do [ -f "$f" ] && gh release upload pruefung "$f" --clobber --repo "$GITHUB_REPOSITORY" || true; done
+      - name: Geprüfte Mac-App für die Veröffentlichung bereithalten
         uses: actions/upload-artifact@v4
         with:
-          name: mac-probelauf
-          path: |
-            ${{ runner.temp }}/work/mac-probelauf.png
-            ${{ runner.temp }}/work/run.log
+          name: mac-app
+          path: ${{ runner.temp }}/mac-out/
           if-no-files-found: ignore
+          retention-days: 3
+
+  # Veröffentlichung: nur wenn Windows- und Mac-Prüfung bestanden sind.
+  release:
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Geprüfte Mac-App holen
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-app
+          path: mac-out
+        continue-on-error: true
+      - name: Veröffentlichung anlegen oder aktualisieren
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ -f channel/NUR-PRUEFEN ]; then echo "Probelauf: Prüfungen bestanden, es wird nichts veröffentlicht."; exit 0; fi
+          V=$(jq -er .version channel/update.json)
+          F=$(jq -er .file channel/update.json)
+          [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Ungültige Version: $V"; exit 1; }
+          [[ "$F" =~ ^[A-Za-z0-9._-]+$ && -f "channel/$F" ]] || { echo "Paketdatei fehlt: $F"; exit 1; }
+          # Prüfsumme des Pakets muss zur Beschreibung passen (Schutz vor halben Uploads)
+          [ "$(sha256sum "channel/$F" | cut -d' ' -f1)" = "$(jq -er .sha256 channel/update.json)" ] || { echo "Prüfsumme stimmt nicht"; exit 1; }
+          FILES=()
+          # Windows-Installer: liegt in Teilen unter channel/installer/ (einzeln zu groß für Git), wird hier zusammengesetzt
+          # und gegen die signierte Prüfsumme geprüft.
+          if compgen -G "channel/installer/*.part*" >/dev/null; then
+            SV=$(jq -er .shell.version channel/update.json)
+            [ "$SV" = "$V" ] || { echo "Installer-Teile gehören nicht zu Version $V"; exit 1; }
+            SN="$RUNNER_TEMP/Betriebsportal-Setup-$SV.exe"
+            cat $(ls channel/installer/*.part* | sort) > "$SN"
+            [ "$(sha256sum "$SN" | cut -d' ' -f1)" = "$(jq -er .shell.sha256 channel/update.json)" ] || { echo "Prüfsumme des Installers stimmt nicht"; exit 1; }
+            FILES+=("$SN")
+          fi
+          for z in mac-out/*.zip; do [ -f "$z" ] && FILES+=("$z"); done
+          # update.json zuletzt: erst wenn alle Dateien da sind, erfahren die Installationen von der neuen Version
+          if gh release view "v$V" >/dev/null 2>&1; then
+            gh release upload "v$V" "channel/$F" "${FILES[@]}" --clobber
+            gh release upload "v$V" channel/update.json --clobber
+          else
+            gh release create "v$V" "channel/$F" "${FILES[@]}" --title "Betriebsportal $V" --notes-file channel/NOTES.md --draft
+            gh release upload "v$V" channel/update.json
+            gh release edit "v$V" --draft=false --latest
+          fi
+          echo "Veröffentlicht: v$V"

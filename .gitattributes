@@ -1,0 +1,3 @@
+*.part* binary
+*.pkg binary
+*.tgz binary
