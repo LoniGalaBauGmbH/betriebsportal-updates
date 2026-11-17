@@ -1,9 +1,8 @@
-Version 1.5.0
+Version 1.5.1
 
-- Neu: Projekte mit Lieferscheinen, Rechnungen, Bildern, Kommentaren und Verlauf
-- Neu: Telefonbuch mit Stichwörtern und Ansprechpersonen
-- Neu: Suche über alles (Strg+K)
-- Neu: Firmenname und Logo
-- Neu: stündliche automatische Sicherung
-- Neu: Nachrichten-Hinweis mit Absender, Vorschau und Ton
-- Kalender: Uhrzeit bei neuen Terminen sofort sichtbar
+- Neu: Das Programm läuft im Hintergrund weiter, wenn das Fenster geschlossen wird (auch an den Arbeitsplätzen)
+- Neu: Kleines Nachrichten-Fenster am Bildschirmrand mit Absender, Text und Ton; Klick öffnet die Unterhaltung
+- Neu: Programm für den Mac (Apple-Chip und Intel)
+- Neu: Profilbilder für alle Mitarbeiter
+- Neu: Sicherungsordner per Explorer/Finder wählen und öffnen
+- Korrektur: Kürzel in der Projektkarte sitzt mittig

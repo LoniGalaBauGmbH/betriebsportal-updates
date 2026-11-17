@@ -38,3 +38,87 @@ jobs:
             [ "$(sha256sum "$RUNNER_TEMP/$SN" | cut -d' ' -f1)" = "$(jq -er .shell.sha256 channel/update.json)" ] || { echo "Prüfsumme des Installers stimmt nicht"; exit 1; }
             gh release upload "v$SV" "$RUNNER_TEMP/$SN" --clobber
           fi
+
+  # Mac-Programm: wird auf einem echten Mac zusammengesetzt, signiert, probeweise gestartet und an die Veröffentlichung gehängt.
+  mac:
+    needs: release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mac-App bauen, signieren, testen, veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [ -f channel/mac/desktop-app.tgz ] || { echo "Kein Mac-Paket in diesem Stand."; exit 0; }
+          V=$(jq -er .version channel/mac/mac.json)
+          EV=$(jq -er .electron channel/mac/mac.json)
+          [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$EV" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Ungültige Versionsangabe"; exit 1; }
+          if gh release view "v$V" --json assets -q '.assets[].name' | grep -q "Betriebsportal-Mac-AppleChip-$V.zip"; then echo "Mac-App $V ist schon veröffentlicht."; exit 0; fi
+          ROOT=$PWD; mkdir -p "$RUNNER_TEMP/work/app" && cd "$RUNNER_TEMP/work"
+          tar -xzf "$ROOT/channel/mac/desktop-app.tgz" -C app
+          [ "$(jq -er .version app/package.json)" = "$V" ] || { echo "Programmpaket passt nicht zur Version"; exit 1; }
+
+          # Programmsymbol
+          mkdir icon.iconset
+          for s in 16 32 128 256 512; do
+            sips -z $s $s app/icon.png --out icon.iconset/icon_${s}x${s}.png >/dev/null
+            sips -z $((s*2)) $((s*2)) app/icon.png --out icon.iconset/icon_${s}x${s}@2x.png >/dev/null
+          done
+          iconutil -c icns icon.iconset -o icon.icns
+
+          curl -sSfL -o SHASUMS256.txt "https://github.com/electron/electron/releases/download/v$EV/SHASUMS256.txt"
+          PB=/usr/libexec/PlistBuddy
+          setp() { $PB -c "Set :$1 $2" "$3" 2>/dev/null || $PB -c "Add :$1 string $2" "$3"; }
+          for ARCH in arm64 x64; do
+            [ "$ARCH" = arm64 ] && NAME=AppleChip || NAME=Intel
+            Z="electron-v$EV-darwin-$ARCH.zip"
+            curl -sSfL -o "$Z" "https://github.com/electron/electron/releases/download/v$EV/$Z"
+            EXPECT=$(grep " \*\{0,1\}$Z\$" SHASUMS256.txt | cut -d' ' -f1)
+            [ -n "$EXPECT" ] && [ "$(shasum -a 256 "$Z" | cut -d' ' -f1)" = "$EXPECT" ] || { echo "Prüfsumme von $Z stimmt nicht"; exit 1; }
+            rm -rf "out-$ARCH" && mkdir "out-$ARCH" && ditto -x -k "$Z" "out-$ARCH"
+            APP="out-$ARCH/Betriebsportal.app"
+            mv "out-$ARCH/Electron.app" "$APP"
+            rm -f "$APP/Contents/Resources/default_app.asar"
+            cp -R app "$APP/Contents/Resources/app"
+            cp icon.icns "$APP/Contents/Resources/betriebsportal.icns"
+            mv "$APP/Contents/MacOS/Electron" "$APP/Contents/MacOS/Betriebsportal"
+            P="$APP/Contents/Info.plist"
+            setp CFBundleExecutable Betriebsportal "$P"; setp CFBundleName Betriebsportal "$P"; setp CFBundleDisplayName Betriebsportal "$P"
+            setp CFBundleIdentifier de.betriebsportal.app "$P"; setp CFBundleIconFile betriebsportal.icns "$P"
+            setp CFBundleShortVersionString "$V" "$P"; setp CFBundleVersion "$V" "$P"
+            setp NSLocalNetworkUsageDescription "Das Betriebsportal sucht den Hauptrechner im Netzwerk und verbindet sich mit ihm." "$P"
+            # Signatur ohne Apple-Entwicklerkonto (ad hoc): nötig, damit die App auf Apple-Chips überhaupt startet
+            codesign --force --deep --sign - "$APP"
+            codesign --verify --deep --strict "$APP"
+            ditto -c -k --keepParent "$APP" "Betriebsportal-Mac-$NAME-$V.zip"
+          done
+
+          # Probelauf auf diesem Mac: App als Hauptrechner starten und prüfen, ob das Portal antwortet
+          export HOME="$RUNNER_TEMP/home"; mkdir -p "$HOME"
+          PORTAL_AUTOROLE=server PORTAL_NO_BACKUP=1 "out-arm64/Betriebsportal.app/Contents/MacOS/Betriebsportal" > run.log 2>&1 &
+          PID=$!
+          OK=0; for i in $(seq 1 45); do if curl -sf http://127.0.0.1:3000/api/setup > setup.json; then OK=1; break; fi; sleep 2; done
+          cat setup.json 2>/dev/null || true; echo
+          sleep 6; screencapture -x "$RUNNER_TEMP/work/mac-probelauf.png" 2>/dev/null || true
+          if [ "$OK" = 1 ]; then
+            jq -e --arg v "$V" '.version == $v and .needed == true and .local == true' setup.json
+            curl -sf http://127.0.0.1:3000/ | grep -q 'extra.js'
+            curl -sf http://127.0.0.1:3000/api/branding >/dev/null
+            echo "PROBELAUF BESTANDEN: Portal $V läuft in der Mac-App."
+          fi
+          ls -la "$HOME/Betriebsportal-Daten" 2>/dev/null || true
+          kill $PID 2>/dev/null || true; sleep 2
+          tail -40 run.log || true
+          [ "$OK" = 1 ] || { echo "PROBELAUF FEHLGESCHLAGEN: Die App hat das Portal nicht gestartet."; exit 1; }
+
+          gh release upload "v$V" "Betriebsportal-Mac-AppleChip-$V.zip" "Betriebsportal-Mac-Intel-$V.zip" --clobber --repo "$GITHUB_REPOSITORY"
+      - name: Bildschirmfoto und Protokoll des Probelaufs aufbewahren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-probelauf
+          path: |
+            ${{ runner.temp }}/work/mac-probelauf.png
+            ${{ runner.temp }}/work/run.log
+          if-no-files-found: ignore
