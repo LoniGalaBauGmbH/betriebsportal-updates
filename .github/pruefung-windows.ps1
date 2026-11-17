@@ -69,7 +69,7 @@ if (-not $PortalOnly) {
   $m.shell.url = "http://127.0.0.1:8765/$setupName"          # Signatur gilt für Version + Prüfsumme, nicht für die Adresse
 }
 $m | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $srv 'update.json') -Encoding utf8
-$server = Start-Process -FilePath 'python' -ArgumentList '-m', 'http.server', '8765', '--bind', '127.0.0.1' -WorkingDirectory $srv -PassThru -WindowStyle Hidden
+$server = Start-Process -FilePath 'node' -ArgumentList (Join-Path $PSScriptRoot 'pruef-server.js'), $srv, '8765' -PassThru -WindowStyle Hidden
 Start-Sleep -Seconds 3
 
 try {

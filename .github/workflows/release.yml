@@ -123,12 +123,13 @@ jobs:
           done
 
           # Probelauf auf diesem Mac: App als Hauptrechner starten, Portal und Nachrichten-Fenster prüfen
-          export HOME="$RUNNER_TEMP/home"; mkdir -p "$HOME"
+          # (Das Programm legt sein Protokoll im echten Benutzerordner ab – HOME deshalb nicht umbiegen.)
+          rm -rf "$HOME/Library/Application Support/Betriebsportal" "$HOME/Betriebsportal-Daten"
           PORTAL_AUTOROLE=server PORTAL_NO_BACKUP=1 PORTAL_TEST_NOTIFY=1 PORTAL_UPDATE_URL=http://127.0.0.1:9 "out-arm64/Betriebsportal.app/Contents/MacOS/Betriebsportal" > run.log 2>&1 &
           PID=$!
           OK=0; for i in $(seq 1 45); do if curl -sf http://127.0.0.1:3000/api/setup > setup.json; then OK=1; break; fi; sleep 2; done
           cat setup.json 2>/dev/null || true; echo
-          sleep 14; screencapture -x "$RUNNER_TEMP/work/mac-probelauf.png" 2>/dev/null || true
+          sleep 11; screencapture -x "$RUNNER_TEMP/work/mac-probelauf.png" 2>/dev/null || true; sleep 4
           PLOG="$HOME/Library/Application Support/Betriebsportal/programm.log"
           cp "$PLOG" "$RUNNER_TEMP/work/mac-programm.log" 2>/dev/null || true
           FAIL=0
