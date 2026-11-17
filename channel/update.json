@@ -1,13 +1,13 @@
 {
-  "version": "1.5.3",
-  "file": "betriebsportal-1.5.3.pkg",
-  "sha256": "f4c36d612fbda1c05acfd6c3a3ce653e5aa7f0a77e822d5382a05bbfd989dc52",
-  "sig": "y1/S+EmTdpFYYGXnWZNJw6qgyq6hy7k6PemEGtkKqGYu7nwy1DxXPlTa1cEwg8DFn0SK5IWy1p2vcPmOSbiQBg==",
-  "date": "2026-11-17T11:08:55.678Z",
+  "version": "1.5.4",
+  "file": "betriebsportal-1.5.4.pkg",
+  "sha256": "7d689b5f6e2c23ad806eac12243886a7a9f90b2a5f7addc0f6172320894fa655",
+  "sig": "wsey9nbq0l3kor4W5OQTapqlEgHJMqFf0V3H6ydRb+SB6ICPTEacA0ugiLguYivuWLg8JFj0I37amXjtyB7YBQ==",
+  "date": "2026-11-17T12:37:03.438Z",
   "shell": {
-    "version": "1.5.3",
-    "url": "https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/download/v1.5.3/Betriebsportal-Setup-1.5.3.exe",
-    "sha256": "e37eefe527b7232d917d62a24069c5e5bb2272362a49f1282a4134bf44ed8376",
-    "sig": "bqHqtDc76760qEmyRkYMP6nfDjy3t3lrQEujiLmIoqnJT0uG4xlnL5Ao8J5g5nlU6eYYnD9d486n+GGV7e+wDA=="
+    "version": "1.5.4",
+    "url": "https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/download/v1.5.4/Betriebsportal-Setup-1.5.4.exe",
+    "sha256": "93630df1967e6b0b7091f0962a3866745ccc351e2c9e5fe4530903229d960cd4",
+    "sig": "hhHJ0x0uDBNZI1/Kp0QbSEZX5oEfIK4HukVY1DpL2n7To5P2mdT6kFKs9EecWlCoFDr9w4gLXlpNH5VFhkZ7DA=="
   }
 }

@@ -1,7 +1,5 @@
-Version 1.5.3
+Version 1.5.4
 
-- Benachrichtigung: Das Programm erkennt neue Nachrichten jetzt selbst und zeigt das kleine Fenster auch bei geschlossenem oder verdecktem Hauptfenster
-- Neu: Menüpunkt Test-Benachrichtigung
-- Neu: PDF und Bilder öffnen sich überall direkt im Programm
-- Neu: Sicherung mit lesbarer Ordner-Ansicht
-- Neu: Sichtbarer Fortschritt bei Updates
+- Korrektur: Das Programm-Update unter Windows scheitert nicht mehr an der gesperrten Installer-Datei
+- Neu: Bei veraltetem Programm bietet das Portal den aktuellen Installer direkt zum Herunterladen an
+- Start: kein Hängenbleiben mehr, wenn der Dienst verzögert antwortet
