@@ -145,6 +145,10 @@ jobs:
           tail -30 run.log || true
           [ "$FAIL" = 0 ] || { echo "PROBELAUF NICHT BESTANDEN"; exit 1; }
           echo "PROBELAUF BESTANDEN"
+          # Wurde die Version schon ohne Mac-App veröffentlicht (Mac kam zu spät dran)? Dann die geprüfte App jetzt nachreichen.
+          if [ ! -f "$ROOT/channel/NUR-PRUEFEN" ] && [ "$(gh release view "v$V" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft 2>/dev/null)" = "false" ]; then
+            gh release upload "v$V" "$RUNNER_TEMP"/mac-out/*.zip --clobber --repo "$GITHUB_REPOSITORY" && echo "Mac-App nachgereicht an v$V"
+          fi
       - name: Bildschirmfoto und Protokoll ablegen
         if: always()
         env:
@@ -164,6 +168,9 @@ jobs:
   # Veröffentlichung: nur wenn Windows- und Mac-Prüfung bestanden sind.
   release:
     needs: [windows, mac]
+    # Windows muss bestanden sein; die Mac-Prüfung darf nicht fehlgeschlagen sein. Bekommt GitHub gerade keinen Mac
+    # (Schritt abgebrochen), wird trotzdem veröffentlicht – dann ohne Mac-App; sie wird nach bestandener Prüfung nachgereicht.
+    if: ${{ always() && needs.windows.result == 'success' && needs.mac.result != 'failure' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
