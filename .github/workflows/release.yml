@@ -1,0 +1,31 @@
+# Erstellt aus den Dateien in channel/ automatisch eine Veröffentlichung (Release).
+# Alle installierten Betriebsportale fragen die jeweils neueste Veröffentlichung ab.
+name: Update veröffentlichen
+on:
+  push:
+    branches: [main]
+    paths: ['channel/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Veröffentlichung anlegen oder aktualisieren
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          V=$(jq -er .version channel/update.json)
+          F=$(jq -er .file channel/update.json)
+          [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Ungültige Version: $V"; exit 1; }
+          [[ "$F" =~ ^[A-Za-z0-9._-]+$ && -f "channel/$F" ]] || { echo "Paketdatei fehlt: $F"; exit 1; }
+          # Prüfsumme des Pakets muss zur Beschreibung passen (Schutz vor halben Uploads)
+          [ "$(sha256sum "channel/$F" | cut -d' ' -f1)" = "$(jq -er .sha256 channel/update.json)" ] || { echo "Prüfsumme stimmt nicht"; exit 1; }
+          if gh release view "v$V" >/dev/null 2>&1; then
+            gh release upload "v$V" "channel/$F" channel/update.json --clobber
+          else
+            gh release create "v$V" "channel/$F" channel/update.json --title "Betriebsportal $V" --notes-file channel/NOTES.md --latest
+          fi
