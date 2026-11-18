@@ -1,5 +1,1 @@
-Version 1.5.5
-
-- Programm-Update: Download jetzt über den Netzwerkteil des Betriebssystems – behebt einen Absturz beim Herunterladen
-- Unerwartete Programmfehler werden ins Protokoll geschrieben
-- Jede Version wird vor der Veröffentlichung auf echtem Windows und Mac geprüft
+Neu in 1.6.0: Zeiterfassung. Ein- und Ausstempeln per QR-Code mit dem Handy (Ausdruck oder wechselnder Code auf einem Bildschirm) oder per Knopf, automatische gesetzliche Pausen, Feiertage je Bundesland, Stundenkonto mit Überstunden, Urlaub beantragen und genehmigen, Krankmeldung mit Bescheinigung, persönliche Unterlagen, Team-Zeiten mit Korrektur und Export als Tabelle.
