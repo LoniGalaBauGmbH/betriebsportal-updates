@@ -116,6 +116,8 @@ jobs:
             setp CFBundleIdentifier de.betriebsportal.app "$P"; setp CFBundleIconFile betriebsportal.icns "$P"
             setp CFBundleShortVersionString "$V" "$P"; setp CFBundleVersion "$V" "$P"
             setp NSLocalNetworkUsageDescription "Das Betriebsportal sucht den Hauptrechner im Netzwerk und verbindet sich mit ihm." "$P"
+            # Einladungs-Links (betriebsportal://…) öffnen das Programm
+            /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" -c "Add :CFBundleURLTypes:0 dict" -c "Add :CFBundleURLTypes:0:CFBundleURLName string de.betriebsportal.app" -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string betriebsportal" "$P" || true
             # Signatur ohne Apple-Entwicklerkonto (ad hoc): nötig, damit die App auf Apple-Chips überhaupt startet
             codesign --force --deep --sign - "$APP"
             codesign --verify --deep --strict "$APP"
