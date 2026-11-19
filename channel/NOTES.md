@@ -1,1 +1,1 @@
-Neu in 1.8.1: Eigener, abgeschotteter Bereich für die Baustelle – Mitarbeiter mit Arbeitsbereich „Baustelle“ sehen nur Start, Zeit, Baustellen, Nachrichten und ihre Aufgaben; keine Rechnungen, Kontakte, Dateiablage oder Kalender. Tagesberichte und Fotos stehen je Tag zusammen; Fotos erscheinen im Bericht und im Ausdruck.
+1.8.2: Das Portal auf dem Server aktualisiert sich jetzt selbst – und zwar sofort, sobald eine neue Version da ist, nicht erst nachts.
