@@ -1,1 +1,1 @@
-1.8.6: Die Baustelle sieht unter „Termine“, wofür sie im Kalender eingetragen ist, und bekommt bei neuen Terminen eine Nachricht. Die Oberfläche lässt sich am Handy nicht mehr zoomen; Fotos vergrößert man durch Antippen.
+1.9.0: Reinsprechen mit Übersetzung – Mitarbeiter sprechen Tagesbericht oder Foto-Beschreibung in ihrer Sprache (z. B. Albanisch) ein; das Portal schreibt den Text auf Deutsch und setzt das Original darunter. Einrichtung unter Einstellungen → Spracheingabe.
