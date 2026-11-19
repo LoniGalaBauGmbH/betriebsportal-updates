@@ -1,1 +1,1 @@
-1.8.5: Einstempeln geht nur noch über den QR-Code (Ausstempeln weiter per Knopf). Mehrere Fotos nacheinander aufnehmen und zusammen hochladen. Datumsfelder am Handy passen in den Dialog.
+1.8.6: Die Baustelle sieht unter „Termine“, wofür sie im Kalender eingetragen ist, und bekommt bei neuen Terminen eine Nachricht. Die Oberfläche lässt sich am Handy nicht mehr zoomen; Fotos vergrößert man durch Antippen.
