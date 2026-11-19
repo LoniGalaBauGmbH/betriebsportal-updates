@@ -10,6 +10,7 @@ set -euo pipefail
 
 DOMAIN="${1:-}"
 CHANNEL="${PORTAL_CHANNEL:-https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/latest/download}"
+STARTER="${PORTAL_STARTER:-https://raw.githubusercontent.com/LoniGalaBauGmbH/betriebsportal-updates/main/server}"
 BASE=/opt/betriebsportal
 VAR=/var/lib/betriebsportal
 say() { printf '\n\033[1m== %s\033[0m\n' "$*"; }
@@ -24,7 +25,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
 apt-get install -y -q curl ca-certificates xz-utils ufw unattended-upgrades caddy
 id portal >/dev/null 2>&1 || useradd --system --home-dir "$VAR" --shell /usr/sbin/nologin portal
-mkdir -p "$BASE/app" "$VAR/daten" "$VAR/sicherung"
+mkdir -p "$BASE" "$VAR/daten" "$VAR/sicherung"
 
 say "2/6 Node.js installieren"
 cat > "$BASE/node-aktualisieren.sh" <<'NODE'
@@ -53,30 +54,41 @@ chmod 755 "$BASE/node-aktualisieren.sh"
 "$BASE/node-aktualisieren.sh"
 
 say "3/6 Betriebsportal laden"
-if [ ! -f "$BASE/app/portal.js" ]; then
-  TMP="$(mktemp -d)"
-  curl -fsSL "$CHANNEL/update.json" -o "$TMP/update.json"
-  "$BASE/node/bin/node" - "$TMP" "$CHANNEL" "$BASE/app" <<'JS'
+# Der Starter (Überwacher + Programm) holt und prüft später alle Updates selbst. Er wird hier geladen und seine Signatur geprüft.
+TMP="$(mktemp -d)"
+curl -fsSL "$STARTER/starter.json" -o "$TMP/starter.json"
+curl -fsSL "$STARTER/starter.js" -o "$TMP/starter.js"
+curl -fsSL "$CHANNEL/update.json" -o "$TMP/update.json"
+"$BASE/node/bin/node" - "$TMP" "$CHANNEL" "$BASE" <<'JS'
 const fs = require('fs'), path = require('path'), zlib = require('zlib'), crypto = require('crypto'), { execFileSync } = require('child_process');
-const [tmp, channel, out] = process.argv.slice(2);
+const [tmp, channel, base] = process.argv.slice(2);
+const PUBKEY = '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAyws5xZoB3KzaP/iGvCj6eyJoX0BTrYeUknfkEitCP2I=\n-----END PUBLIC KEY-----\n';
+const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
+const verify = (text, sig) => crypto.verify(null, Buffer.from(text), PUBKEY, Buffer.from(String(sig), 'base64'));
+// 1. Starter prüfen
+const st = JSON.parse(fs.readFileSync(path.join(tmp, 'starter.json'), 'utf8')), starter = fs.readFileSync(path.join(tmp, 'starter.js'));
+if (sha(starter) !== st.sha256 || !verify(`starter\n${st.version}\n${st.sha256}`, st.sig)) throw new Error('Die Signatur des Starters stimmt nicht');
+// 2. Aktuelles Programm-Paket prüfen (liefert die Oberfläche; neuere Versionen holt der Starter danach selbst)
 const m = JSON.parse(fs.readFileSync(path.join(tmp, 'update.json'), 'utf8'));
 if (!/^[\w.-]+\.pkg$/.test(m.file)) throw new Error('Unerwarteter Dateiname im Update-Verzeichnis');
-const pkg = path.join(tmp, m.file);
-execFileSync('curl', ['-fsSL', `${channel}/${m.file}`, '-o', pkg], { stdio: 'inherit' });
-const buf = fs.readFileSync(pkg);
-if (crypto.createHash('sha256').update(buf).digest('hex') !== m.sha256) throw new Error('Die Prüfsumme des Pakets stimmt nicht');
+execFileSync('curl', ['-fsSL', `${channel}/${m.file}`, '-o', path.join(tmp, m.file)], { stdio: 'inherit' });
+const buf = fs.readFileSync(path.join(tmp, m.file));
+if (sha(buf) !== m.sha256 || !verify(`${m.version}\n${m.sha256}`, m.sig)) throw new Error('Die Signatur des Programm-Pakets stimmt nicht');
 const j = JSON.parse(zlib.gunzipSync(buf));
+// 3. Neuen Programmordner zusammenstellen und gegen den alten tauschen
+const neu = path.join(base, 'app.neu'), app = path.join(base, 'app'), alt = path.join(base, 'app.alt');
+fs.rmSync(neu, { recursive: true, force: true }); fs.mkdirSync(path.join(neu, 'public'), { recursive: true });
 for (const [name, b64] of Object.entries(j.files)) {
-  if (!/^(portal\.js|public\/[\w.-]+)$/.test(name)) throw new Error('Unerwartete Datei im Paket: ' + name);
-  fs.mkdirSync(path.dirname(path.join(out, name)), { recursive: true });
-  fs.writeFileSync(path.join(out, name), Buffer.from(b64, 'base64'));
+  if (!/^public\/[\w.-]+$/.test(name)) continue;                            // nur die Oberfläche; das Programm selbst steckt im Starter
+  fs.writeFileSync(path.join(neu, name), Buffer.from(b64, 'base64'));
 }
-console.log('Betriebsportal ' + j.version + ' geladen');
+fs.writeFileSync(path.join(neu, 'portal.js'), starter);
+fs.rmSync(alt, { recursive: true, force: true });
+if (fs.existsSync(app)) fs.renameSync(app, alt);
+fs.renameSync(neu, app); fs.rmSync(alt, { recursive: true, force: true });
+console.log(`Starter ${st.version} installiert (aktuelle Programmversion: ${m.version})`);
 JS
-  rm -rf "$TMP"
-else
-  echo "Programm ist schon vorhanden (aktualisiert sich selbst)"
-fi
+rm -rf "$TMP"
 chown -R root:root "$BASE"; chmod -R go-w "$BASE"
 chown -R portal:portal "$VAR"; chmod 750 "$VAR"
 
