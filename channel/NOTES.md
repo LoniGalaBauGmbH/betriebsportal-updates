@@ -1,1 +1,1 @@
-1.8.2: Das Portal auf dem Server aktualisiert sich jetzt selbst – und zwar sofort, sobald eine neue Version da ist, nicht erst nachts.
+1.8.3: Beim Anlegen eines Mitarbeiters wird der Arbeitsbereich gewählt (Baustelle oder Büro). Eigene Einladung für die Baustelle – neue Konten landen direkt im Baustellen-Bereich.
