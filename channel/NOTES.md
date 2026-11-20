@@ -1,1 +1,1 @@
-1.10.2: Programm-Updates laufen jetzt vollständig im Programm – laden, installieren, neu starten – ohne Download im Browser. Liegt das Programm nur im Hintergrund, aktualisiert es sich ohne Rückfrage.
+Neu: Anbindung an geoCapture. Fahrzeuge und Maschinen mit Karte, Fahrzeuge vor Ort im Projekt, Maschinenstunden je Projekt und als Vorschlag im Tagesbericht, Formulare aus geoCapture bei den Projekt-Dokumenten. Auf Wunsch werden Stempelzeiten und Abwesenheiten übernommen. Einrichten unter Einstellungen → geoCapture.
