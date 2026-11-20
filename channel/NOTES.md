@@ -1,1 +1,1 @@
-1.10.0: Ordner für die Projektübersicht – Projekte hineinziehen, auf Wunsch mit Jahr und Monat. Adress-Vorschläge beim Eintippen mit Karte der Baustelle. Kopieren und Einfügen per Rechtsklick im Programm.
+1.10.1: Die Ordner-Zeile bei der Sicherung ist sauber ausgerichtet (Feld und Knöpfe in einer Reihe).
