@@ -1,1 +1,1 @@
-1.9.1: Die Kamera bleibt offen – mehrere Fotos hintereinander aufnehmen und zusammen hochladen. „Meine Termine“ als Monatskalender mit Terminen, Urlaub, Krankheit, Feiertagen und freien Tagen.
+1.10.0: Ordner für die Projektübersicht – Projekte hineinziehen, auf Wunsch mit Jahr und Monat. Adress-Vorschläge beim Eintippen mit Karte der Baustelle. Kopieren und Einfügen per Rechtsklick im Programm.
