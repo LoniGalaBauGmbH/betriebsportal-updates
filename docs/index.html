@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Betriebsportal – Software für Büro und Baustelle: Zeiterfassung, Bautagesbericht, Projekte</title>
+<meta name="description" content="Betriebsportal: Zeiterfassung per QR-Code, Bautagesbericht mit Fotos, Projekte, Einsatzplanung und Urlaub – für GaLaBau, Bau und Handwerk. Läuft auf dem eigenen Computer, in wenigen Minuten eingerichtet.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%233454d1'/%3E%3Cpath d='M8.500 16.500l5 5L24 11' fill='none' stroke='white' stroke-width='3.400'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:"Nunito Sans";font-weight:400;font-display:swap;src:url(fonts/nunito-sans-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Nunito Sans";font-weight:600;font-display:swap;src:url(fonts/nunito-sans-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"Nunito Sans";font-weight:700;font-display:swap;src:url(fonts/nunito-sans-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Nunito Sans";font-weight:800;font-display:swap;src:url(fonts/nunito-sans-latin-800-normal.woff2) format("woff2")}
+:root{--bg:#eef0f3;--white:#fff;--text:#2c3038;--soft:#5d636f;--line:#d9dde4;--a:#3454d1;--a-d:#2942ab;--a-l:#e7ecfb;--navy:#161d33}
+*{box-sizing:border-box}html{scroll-behavior:smooth}main{overflow-x:clip}
+body{margin:0;font:400 17px/1.6 "Nunito Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+h1,h2,h3,h4{font-weight:700;line-height:1.2;margin:0;color:var(--text)}
+h1{font-size:clamp(34px,4.5vw,54px);letter-spacing:-.01em}h2{font-size:clamp(27px,3vw,36px)}h3{font-size:21px}
+p{margin:0}
+/* Leisten oben */
+.util{background:var(--white);border-bottom:1px solid var(--line);font-size:13.5px}
+.util .wrap{display:flex;justify-content:flex-end;gap:26px;height:38px;align-items:center}
+.util a{text-decoration:none;color:var(--soft);display:inline-flex;align-items:center;gap:7px}.util a:hover{color:var(--a)}
+header{position:sticky;top:0;z-index:20;background:var(--white);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;height:68px;gap:44px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px;text-decoration:none;color:var(--text)}
+.logo i{display:grid;place-items:center;width:30px;height:30px;background:var(--a)}
+.nav nav{display:flex;gap:34px}.nav nav a{text-decoration:none;font-weight:700;font-size:15.5px;padding:23px 0;border-bottom:3px solid transparent}.nav nav a:hover{border-color:var(--a)}
+.nav .btn{margin-left:auto}
+.btn{display:inline-flex;align-items:center;gap:10px;height:46px;padding:0 20px;background:var(--a);color:#fff;font:700 15.5px/1 inherit;font-family:inherit;text-decoration:none;border:0;cursor:pointer}
+.btn:hover{background:var(--a-d)}.btn svg{flex:none}.btn.lg{height:54px;padding:0 26px;font-size:17px}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 2px var(--text)}.btn.ghost:hover{background:var(--text);color:#fff}
+.more{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;font-size:15.5px}.more::after{content:"→";color:var(--a);font-size:19px;transition:transform .15s}.more:hover::after{transform:translateX(4px)}
+/* Einstieg */
+.hero{padding:58px 0 0}
+.hero h2{font-size:clamp(20px,2.3vw,28px);margin-top:22px;max-width:30ch}
+.hero .intro{max-width:76ch;margin:18px 0 0;color:var(--soft)}
+.hero .acts{display:flex;gap:14px;flex-wrap:wrap;margin:28px 0 0}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:44px}
+.tile{background:var(--white);text-decoration:none;display:flex;flex-direction:column;border-bottom:3px solid transparent;transition:border-color .15s}
+.tile:hover{border-color:var(--a)}.tile .pic{aspect-ratio:4/3;overflow:hidden;background:var(--a-l)}.tile img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.tile b{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;font-size:20px;font-weight:700}.tile b::after{content:"→";color:var(--a)}
+section{padding:84px 0}
+.h{margin-bottom:34px}.h p{color:var(--soft);max-width:70ch;margin-top:12px}
+/* Branchen-Reiter */
+.tabs{display:flex;gap:34px;border-bottom:1px solid #c7ccd6;margin-bottom:38px;overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:0 0 13px;font:700 15.5px inherit;font-family:inherit;color:var(--soft);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--text);border-color:var(--a)}
+.pane{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:60px;align-items:center}.pane[hidden]{display:none}
+.pane .pic{background:var(--white);border:1px solid var(--line);aspect-ratio:4/3;overflow:hidden}.pane .pic img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.pane h3{font-size:clamp(26px,2.8vw,34px);margin-bottom:22px}
+.sq{list-style:none;margin:0 0 28px;padding:0;display:grid;gap:11px;font-size:18.500px}
+.sq li{display:flex;gap:12px;align-items:center}.sq li::before{content:"";width:13px;height:13px;background:var(--a);flex:none}
+/* Zahlen */
+.band{background:var(--navy);color:#fff;padding:78px 0}
+.band h2{color:#fff}.band .h p{color:#b9c1d6}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin-top:44px}
+.fact{background:var(--a);padding:24px 24px 22px}.fact small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.75;min-height:17px}
+.fact b{display:block;font-size:clamp(40px,4.4vw,58px);font-weight:800;line-height:1.05;margin:4px 0 8px}.fact span{font-weight:700;font-size:15px}
+/* Aufruf */
+.call{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:60px;align-items:center}
+.call p{font-size:19px;font-weight:600;margin:14px 0 26px;max-width:40ch}
+.call .pic{border:1px solid var(--line);background:var(--white)}
+/* Vorteile, Funktionen */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.card{background:var(--white);padding:26px 26px 28px}
+.card h3{margin-bottom:14px;min-height:2.4em;display:flex;align-items:flex-end}
+.card p{display:flex;gap:12px;font-size:15.5px;color:var(--soft)}
+.card p::before{content:"";width:18px;height:18px;margin-top:3px;flex:none;background:var(--a) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.600'%3E%3Cpath d='m6 12.500 4 4 8-9'/%3E%3C/svg%3E") center/12px no-repeat}
+.fn{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.fn div{background:var(--white);padding:24px 26px}.fn h3{font-size:18.500px;margin-bottom:6px;display:flex;gap:11px;align-items:center}.fn h3::before{content:"";width:11px;height:11px;background:var(--a);flex:none}
+.fn p{font-size:15.5px;color:var(--soft)}
+/* Schritte */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;counter-reset:s}
+.step{background:var(--white);padding:28px 26px;counter-increment:s;border-top:3px solid var(--a)}
+.step::before{content:"Schritt " counter(s);display:block;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a);margin-bottom:12px}
+.step h3{margin-bottom:8px}.step p{font-size:15.5px;color:var(--soft)}
+.note{margin-top:22px;background:var(--a-l);border-left:4px solid var(--a);padding:18px 22px;font-size:16px}.note b{font-weight:700}
+/* Download */
+.dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.dl>div{background:var(--white);padding:30px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;border-top:3px solid transparent}.dl>div.best{border-color:var(--a)}
+.dl small{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}.dl h3{font-size:30px;margin-bottom:6px}
+.dl .alt{font-size:14.500px;color:var(--soft);border-top:1px solid var(--line);padding-top:14px;margin-top:8px;width:100%}.dl .alt b{color:var(--text)}.dl .alt a{color:var(--a);font-weight:700}
+.ver{margin-top:18px;color:var(--soft);font-size:14.5px}
+/* Fragen */
+.faq{background:var(--white)}
+details{border-bottom:1px solid var(--line)}details:last-child{border-bottom:0}
+summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:16px;padding:20px 26px;font-weight:700;font-size:18px}
+summary::-webkit-details-marker{display:none}summary::after{content:"+";margin-left:auto;font-size:24px;font-weight:400;color:var(--a);line-height:1}
+details[open] summary::after{content:"–"}details p{padding:0 26px 22px;color:var(--soft);max-width:80ch}
+/* Kontakt-Band, Fuß */
+.contact{background:var(--navy);color:#fff;padding:64px 0}.contact .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:40px;align-items:center}
+.contact h2{color:#fff}.contact p{color:#b9c1d6;margin-top:12px;max-width:52ch}.contact .btn{justify-self:end;background:#fff;color:var(--navy)}.contact .btn:hover{background:var(--a-l)}
+footer{background:var(--white);padding:54px 0 30px;font-size:15px}
+footer .cols{display:grid;grid-template-columns:1.3fr .8fr 1.2fr 1.4fr;gap:44px}
+footer h4{font-size:15.5px;margin-bottom:12px}footer p{margin:0 0 6px;color:var(--soft)}footer nav{display:grid;gap:6px}footer nav a{text-decoration:none;color:var(--soft)}footer a:hover{color:var(--a)}
+footer .legal{margin-top:38px;padding-top:18px;border-top:1px solid var(--line);color:var(--soft);font-size:14px}
+@media (max-width:920px){
+  .util{display:none}.nav nav{display:none}.nav{height:60px;gap:12px}.nav .btn{height:40px;padding:0 14px;font-size:14.5px}.logo{font-size:19px}
+  .tiles,.cards,.fn,.steps,.dl{grid-template-columns:minmax(0,1fr)}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pane,.call,.contact .wrap{grid-template-columns:minmax(0,1fr);gap:28px}.contact .btn{justify-self:start}
+  .card h3{min-height:0}section{padding:60px 0}.band{padding:60px 0}footer .cols{grid-template-columns:minmax(0,1fr);gap:26px}
+  .hero{padding-top:40px}
+}
+</style>
+</head>
+<body>
+<div class="util"><div class="wrap">
+  <a href="#download"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>Download</a>
+  <a href="#fragen">Häufige Fragen</a>
+  <a href="mailto:info@loni-galabau.de"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.500" y="5.500" width="17" height="13"/><path d="m4.500 7.500 7.500 5.500 7.500-5.500"/></svg>Kontakt</a>
+</div></div>
+<header><div class="wrap nav">
+  <a class="logo" href="#"><i><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.200"><path d="m5 12.500 4.500 4.500L19 7.500"/></svg></i>Betriebsportal</a>
+  <nav><a href="#branchen">Branchen</a><a href="#funktionen">Funktionen</a><a href="#vorteile">Vorteile</a><a href="#start">Einrichtung</a><a href="#fragen">Fragen</a></nav>
+  <a class="btn" href="#download">Herunterladen</a>
+</div></header>
+
+<main>
+<section class="hero" style="padding-bottom:84px"><div class="wrap">
+  <h1>Büro und Baustelle digital führen.</h1>
+  <h2>Software für Zeiterfassung, Bautagesbericht und Projekte – für GaLaBau, Bau und Handwerk.</h2>
+  <p class="intro">Mit dem Betriebsportal erfassen Ihre Mitarbeiter Arbeitszeiten per QR-Code, dokumentieren die Baustelle mit Fotos und schreiben den Tagesbericht direkt am Handy. Im Büro sehen Sie Stunden, Urlaub, Projekte und Termine an einem Ort. Das Programm läuft auf Ihrem eigenen Computer und ist in wenigen Minuten eingerichtet.</p>
+  <div class="acts"><a class="btn lg" href="#download">Jetzt herunterladen</a><a class="btn lg ghost" href="#funktionen">Funktionen ansehen</a></div>
+  <div class="tiles">
+    <a class="tile" href="#funktionen"><div class="pic"><img src="img/kachel-zeit.jpg" alt="Zeiterfassung am Handy: eingestempelt, Stunden heute" width="800" height="600"></div><b>Zeiten erfassen</b></a>
+    <a class="tile" href="#funktionen"><div class="pic"><img src="img/kachel-doku.jpg" alt="Tagesberichte und Fotos einer Baustelle, nach Tagen sortiert" width="800" height="600"></div><b>Baustelle dokumentieren</b></a>
+    <a class="tile" href="#funktionen"><div class="pic"><img src="img/kachel-team.jpg" alt="Stundenkonten und Urlaub aller Mitarbeiter" width="800" height="600"></div><b>Stunden auswerten</b></a>
+  </div>
+</div></section>
+
+<section id="branchen" style="padding-top:0"><div class="wrap">
+  <div class="h"><h2>Software für Ihre Branche</h2></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-pane="p1">GaLaBau</button><button role="tab" aria-selected="false" data-pane="p2">Bau &amp; Tiefbau</button><button role="tab" aria-selected="false" data-pane="p3">Handwerk</button><button role="tab" aria-selected="false" data-pane="p4">Dienstleister</button>
+  </div>
+  <div class="pane" id="p1"><div class="pic"><img src="img/kachel-buero.jpg" alt="Übersicht im Büro" width="800" height="600"></div><div><h3>Garten- &amp; Landschaftsbau</h3><ul class="sq"><li>Stunden je Baustelle</li><li>Fotos vom Baufortschritt</li><li>Tagesbericht mit Material und Maschinen</li><li>Einsatzplanung der Kolonnen</li><li>Urlaub und Krankmeldung</li></ul><a class="btn" href="#funktionen">Mehr erfahren</a></div></div>
+  <div class="pane" id="p2" hidden><div class="pic"><img src="img/kachel-doku.jpg" alt="Bautagebuch je Tag" width="800" height="600" loading="lazy"></div><div><h3>Bau &amp; Tiefbau</h3><ul class="sq"><li>Bautagebuch mit Wetter und Personal</li><li>Fotos mit Uhrzeit und Standort</li><li>Unterschrift des Auftraggebers</li><li>Mappen für Pläne und Abnahmen</li><li>Stunden für die Nachkalkulation</li></ul><a class="btn" href="#funktionen">Mehr erfahren</a></div></div>
+  <div class="pane" id="p3" hidden><div class="pic"><img src="img/kachel-kalender.jpg" alt="Kalender mit Terminen und Abwesenheiten" width="800" height="600" loading="lazy"></div><div><h3>Handwerk</h3><ul class="sq"><li>Aufträge mit allen Unterlagen</li><li>Termine und Einsatzorte je Mitarbeiter</li><li>Zeiterfassung per QR-Code</li><li>Aufgaben mit Fälligkeit</li><li>Nachrichten an das ganze Team</li></ul><a class="btn" href="#funktionen">Mehr erfahren</a></div></div>
+  <div class="pane" id="p4" hidden><div class="pic"><img src="img/kachel-qr.jpg" alt="QR-Codes zum Stempeln je Einsatzort" width="800" height="600" loading="lazy"></div><div><h3>Dienstleister</h3><ul class="sq"><li>QR-Code je Objekt oder Fahrzeug</li><li>Nachweis: wer war wann wo</li><li>Stundenkonto und Überstunden</li><li>Foto-Nachweise mit Beschreibung</li><li>Monatsauswertung für das Lohnbüro</li></ul><a class="btn" href="#funktionen">Mehr erfahren</a></div></div>
+</div></section>
+
+<div class="band"><div class="wrap">
+  <div class="h" style="margin-bottom:0"><h2>Warum Betriebsportal?</h2><p>Entwickelt in einem Garten- und Landschaftsbaubetrieb, der es selbst jeden Tag einsetzt. Kein Baukasten und keine Schulung: Das Programm ist fertig, Sie legen Mitarbeiter und Projekte an und arbeiten.</p></div>
+  <div class="facts">
+    <div class="fact"><small>Einrichtung</small><b>10 Min.</b><span>bis zum ersten Stempeln</span></div>
+    <div class="fact"><small>Ein Programm</small><b>1</b><span>für Büro und Baustelle</span></div>
+    <div class="fact"><small>Ihre Daten</small><b>100 %</b><span>auf Ihrem eigenen Rechner</span></div>
+    <div class="fact"><small>Sicherung</small><b>60 Min.</b><span>alle 60 Minuten automatisch</span></div>
+  </div>
+</div></div>
+
+<section><div class="wrap call">
+  <div><h2>Bereit für den Alltag ohne Stundenzettel?</h2><p>Laden Sie das Programm herunter und richten Sie es selbst ein. Wenn Sie Unterstützung möchten, begleiten wir Sie dabei.</p><a class="btn lg" href="#download">Jetzt herunterladen</a></div>
+  <div class="pic"><img src="img/buero-uebersicht.jpg" alt="Betriebsportal im Büro: Aufgaben, Termine und Neues von den Baustellen" width="1440" height="900" loading="lazy"></div>
+</div></section>
+
+<section id="funktionen" style="padding-top:0"><div class="wrap">
+  <div class="h"><h2>Funktionen im Überblick</h2><p>Alles, was zwischen Büro und Baustelle täglich anfällt – in einem Programm, das am Computer und am Handy läuft.</p></div>
+  <div class="fn">
+    <div><h3>Zeiterfassung per QR-Code</h3><p>Code ausdrucken und an die Tür hängen. Morgens scannen, abends in der App ausstempeln.</p></div>
+    <div><h3>Stundenkonto &amp; Urlaub</h3><p>Überstunden, gesetzliche Pausen und Feiertage je Bundesland. Urlaubsantrag und Krankmeldung digital.</p></div>
+    <div><h3>Bautagesbericht</h3><p>Personal aus den Stempelzeiten, Maschinen, Material, Wetter und Unterschrift – als PDF mit Fotos.</p></div>
+    <div><h3>Foto-Dokumentation</h3><p>Mehrere Fotos am Stück. Beschreibung, Uhrzeit, Standort und Name werden festgehalten.</p></div>
+    <div><h3>Spracheingabe mit Übersetzung</h3><p>Mitarbeiter sprechen in ihrer Sprache ein. Im Bericht steht der Text auf Deutsch, das Original darunter.</p></div>
+    <div><h3>Projekte &amp; Unterlagen</h3><p>Lieferscheine, Rechnungen, Pläne und Aufgaben je Projekt. PDF und Bilder öffnen direkt im Programm.</p></div>
+    <div><h3>Kalender &amp; Einsatzplanung</h3><p>Das Büro trägt ein, wer wann wo ist. Jeder sieht seine Termine und freien Tage.</p></div>
+    <div><h3>Nachrichten</h3><p>An alle oder an Einzelne, mit Anhang. Am Computer erscheint eine Meldung mit Ton.</p></div>
+    <div><h3>Eigener Baustellen-Bereich</h3><p>Mitarbeiter draußen sehen nur, was sie brauchen – keine Rechnungen, keine Kundendaten.</p></div>
+  </div>
+</div></section>
+
+<section id="vorteile" style="padding-top:0"><div class="wrap">
+  <div class="h"><h2>Ihre Vorteile mit dem Betriebsportal</h2></div>
+  <div class="cards">
+    <div class="card"><h3>Ihre Daten bleiben bei Ihnen</h3><p>Das Portal läuft auf Ihrem eigenen Computer oder Server – nicht in einer fremden Cloud.</p></div>
+    <div class="card"><h3>In Minuten eingerichtet</h3><p>Herunterladen, Hauptrechner wählen, Konto anlegen. Ohne Techniker und ohne Vorkenntnisse.</p></div>
+    <div class="card"><h3>Durchgängig statt Insellösung</h3><p>Zeiten, Fotos, Berichte und Projekte hängen zusammen und müssen nicht doppelt erfasst werden.</p></div>
+    <div class="card"><h3>Aus der Praxis entwickelt</h3><p>Entstanden im eigenen Betrieb und orientiert an echten Abläufen im Büro und auf der Baustelle.</p></div>
+    <div class="card"><h3>Immer aktuell</h3><p>Neue Funktionen und Korrekturen kommen als Update von selbst auf alle Geräte.</p></div>
+    <div class="card"><h3>Sicher bei Ausfall</h3><p>Stündliche Sicherung, zusätzlich als normale Ordner und Tabellen – lesbar auch ohne das Programm.</p></div>
+  </div>
+</div></section>
+
+<section id="start" style="padding-top:0"><div class="wrap">
+  <div class="h"><h2>So richten Sie das Betriebsportal ein</h2><p>Ein Computer im Büro wird der Hauptrechner. Mehr braucht es für den Start nicht.</p></div>
+  <div class="steps">
+    <div class="step"><h3>Herunterladen und installieren</h3><p>Datei öffnen – das Programm installiert sich selbst und startet. Eine Lizenznummer ist nicht nötig.</p></div>
+    <div class="step"><h3>Hauptrechner festlegen</h3><p>Auf einem Büro-Computer „Das ist der Hauptrechner“ wählen und Ihr Administrator-Konto anlegen.</p></div>
+    <div class="step"><h3>Mitarbeiter einladen</h3><p>Weitere Computer finden den Hauptrechner im Netzwerk von selbst. Mitarbeiter erhalten eine Einladung per WhatsApp oder E-Mail.</p></div>
+  </div>
+  <p class="note"><b>Zugriff von unterwegs:</b> Im Büro-WLAN funktioniert das Portal sofort, auch am Handy. Sollen Mitarbeiter von der Baustelle oder von zu Hause zugreifen, zieht das Portal auf einen kleinen gemieteten Server um und nimmt Ihre Daten mit. Bei der Einrichtung unterstützen wir Sie.</p>
+</div></section>
+
+<section id="download" style="padding-top:0"><div class="wrap">
+  <div class="h"><h2>Download</h2><p>Dasselbe Programm für den Hauptrechner und für jeden weiteren Arbeitsplatz.</p></div>
+  <div class="dl">
+    <div id="dl-win"><small>Windows 10 und 11</small><h3>Windows</h3><a class="btn lg" href="https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/download/v1.8.0/Betriebsportal-Setup-1.8.0.exe"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>Für Windows herunterladen</a>
+      <p class="alt">Zeigt Windows „Der Computer wurde geschützt“? Klicken Sie auf <b>Weitere Informationen</b> und dann auf <b>Trotzdem ausführen</b>. Die Meldung erscheint bei neuen Programmen, bis sie häufig genug installiert wurden.</p></div>
+    <div id="dl-mac"><small>macOS 12 oder neuer</small><h3>Mac</h3><a class="btn lg" href="https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/download/v1.8.0/Betriebsportal-Mac-AppleChip-1.8.0.zip"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.200"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>Für Mac herunterladen</a>
+      <p class="alt">Für Macs mit Apple-Chip. <a href="https://github.com/LoniGalaBauGmbH/betriebsportal-updates/releases/download/v1.8.0/Betriebsportal-Mac-Intel-1.8.0.zip">Version für ältere Macs mit Intel-Chip</a>. Beim ersten Start mit <b>Rechtsklick → Öffnen</b> starten und einmal bestätigen.</p></div>
+  </div>
+  <p class="ver">Aktuelle Version 1.8.0 · Handy und Tablet: im Browser öffnen und „Zum Startbildschirm hinzufügen“ wählen.</p>
+</div></section>
+
+<section id="fragen" style="padding-top:0"><div class="wrap">
+  <div class="h"><h2>Häufige Fragen</h2></div>
+  <div class="faq">
+    <details open><summary>Wo liegen unsere Daten?</summary><p>Auf Ihrem Hauptrechner im Büro – nicht bei uns und nicht in einer fremden Cloud. Ziehen Sie später auf einen Server um, mieten Sie ihn selbst; auch dann gehören die Daten Ihnen.</p></details>
+    <details><summary>Brauchen wir einen Server oder ein Netzlaufwerk?</summary><p>Nein. Ein normaler Büro-Computer genügt als Hauptrechner; er sollte während der Arbeitszeit eingeschaltet sein. Die stündliche Sicherung können Sie auf ein Netzlaufwerk, eine USB-Festplatte oder in einen Cloud-Ordner legen.</p></details>
+    <details><summary>Was passiert, wenn der Hauptrechner ausfällt?</summary><p>Das Programm sichert jede Stunde alle Daten und Dateien. Auf einem neuen Computer installieren Sie das Programm und spielen die letzte Sicherung ein. Zusätzlich liegt alles als normale Ordner und Tabellen vor.</p></details>
+    <details><summary>Gibt es eine App für das Handy?</summary><p>Das Portal läuft im Browser jedes Handys und lässt sich wie eine App auf den Startbildschirm legen – ohne App-Store. Kamera-Ansicht, Mikrofon und Standort funktionieren, sobald das Portal über eine sichere Adresse (https) erreichbar ist.</p></details>
+    <details><summary>Wie funktioniert das Stempeln?</summary><p>Sie drucken einen QR-Code aus und hängen ihn an die Tür oder ins Fahrzeug. Der Mitarbeiter scannt ihn morgens mit der Handy-Kamera und ist eingestempelt; ausgestempelt wird per Knopf in der App. Für jede Baustelle kann es einen eigenen Code geben, dann landen die Stunden direkt beim richtigen Projekt.</p></details>
+    <details><summary>Können Mitarbeiter alles sehen?</summary><p>Nein. Sie legen je Person fest, ob sie zum Büro oder zur Baustelle gehört. Baustellen-Konten sehen ihre Zeiten, ihre Termine, Fotos und Tagesberichte – aber keine Rechnungen, Kundenkontakte oder Stunden anderer.</p></details>
+    <details><summary>Was kostet die Übersetzung bei der Spracheingabe?</summary><p>Dafür nutzt das Portal einen KI-Dienst, bei dem Sie ein eigenes Konto anlegen. Eine Aufnahme kostet dort etwa einen Cent. Ohne dieses Konto funktioniert alles andere wie gewohnt.</p></details>
+  </div>
+</div></section>
+</main>
+
+<div class="contact"><div class="wrap">
+  <div><h2>Fragen oder Wünsche?</h2><p>Schreiben Sie uns, wenn Ihnen eine Funktion fehlt oder Sie Unterstützung bei der Einrichtung möchten.</p></div>
+  <a class="btn lg" href="mailto:info@loni-galabau.de">info@loni-galabau.de</a>
+</div></div>
+
+<footer><div class="wrap">
+  <div class="cols">
+    <div><a class="logo" href="#" style="margin-bottom:14px"><i><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.200"><path d="m5 12.500 4.500 4.500L19 7.500"/></svg></i>Betriebsportal</a><p>Software für Büro und Baustelle.</p><p>Ein Produkt der Loni Galabau GmbH.</p></div>
+    <div><h4>Seite</h4><nav><a href="#branchen">Branchen</a><a href="#funktionen">Funktionen</a><a href="#vorteile">Vorteile</a><a href="#start">Einrichtung</a><a href="#download">Download</a></nav></div>
+    <div id="impressum"><h4>Impressum</h4><p>Loni Galabau GmbH<br>Auf der Roos 3<br>65795 Hattersheim am Main</p><p>Vertreten durch: Valon Sinanaj (vertretungsberechtigter Geschäftsführer)</p><p>Telefon: 06190 9266134<br>E-Mail: <a href="mailto:info@loni-galabau.de">info@loni-galabau.de</a></p><p>Eingetragen im Handelsregister · Registergericht: Amtsgericht Frankfurt am Main · HRB 125735</p></div>
+    <div id="datenschutz"><h4>Datenschutz</h4><p>Diese Seite setzt keine Cookies und verwendet keine Analyse- oder Werbedienste. Schriften und Bilder liegen auf dieser Seite selbst und werden nicht von Dritten nachgeladen.</p><p>Die Seite und die Downloads werden über GitHub (GitHub, Inc., USA) ausgeliefert. Dabei verarbeitet GitHub technisch notwendige Daten wie die IP-Adresse.</p></div>
+  </div>
+  <p class="legal">© Loni Galabau GmbH · Verantwortlich im Sinne des Datenschutzes: Anschrift wie im Impressum.</p>
+</div></footer>
+
+<script>
+(function(){
+  var mac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);var el=document.getElementById(mac?'dl-mac':'dl-win');if(el)el.classList.add('best');
+  var tabs=document.querySelectorAll('.tabs button');
+  tabs.forEach(function(t){t.addEventListener('click',function(){tabs.forEach(function(x){var on=x===t;x.setAttribute('aria-selected',on);document.getElementById(x.dataset.pane).hidden=!on;});});});
+})();
+</script>
+</body>
+</html>
