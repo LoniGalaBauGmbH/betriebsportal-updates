@@ -1,1 +1,1 @@
-1.10.1: Die Ordner-Zeile bei der Sicherung ist sauber ausgerichtet (Feld und Knöpfe in einer Reihe).
+1.10.2: Programm-Updates laufen jetzt vollständig im Programm – laden, installieren, neu starten – ohne Download im Browser. Liegt das Programm nur im Hintergrund, aktualisiert es sich ohne Rückfrage.
