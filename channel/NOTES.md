@@ -1,1 +1,1 @@
-Neu: Rechnungen. Das Portal liest PDF- und E-Rechnungen selbst, ordnet die Positionen den Projekten zu (auch mehrere Projekte in einer Rechnung), prüft die Summen und berechnet den Einkauf je Projekt. Neuer Menüpunkt Rechnungen, im Projekt der Reiter Einkauf.
+Neu: Texterkennung für gescannte und fotografierte Rechnungen. Läuft im Portal selbst, startet automatisch, rechnet alle Beträge nach.
