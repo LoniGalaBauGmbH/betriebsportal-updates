@@ -1,1 +1,1 @@
-Neu mit geoCapture: Live-Karte der Fahrzeuge, Fahrtenbuch je Fahrzeug und Tag (Route, Kilometer, Fahrer, Halte mit Ort), Kilometer-Übersicht, Geräte je Baustelle, Fristen für TÜV und Inspektion. Standzeiten der Fahrzeuge beim Projekt und im Tagesbericht. Behebt: geoCapture-Daten kamen in 1.11.0 leer an.
+Karte überarbeitet: keine Trennlinien mehr, nutzt die ganze Fläche, Zoom mit dem Mausrad.
