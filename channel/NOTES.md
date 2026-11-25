@@ -1,1 +1,1 @@
-Neu: Texterkennung für gescannte und fotografierte Rechnungen. Läuft im Portal selbst, startet automatisch, rechnet alle Beträge nach.
+Jede hochgeladene Datei lässt sich als Rechnung erfassen: unter Dateien, in der Vorschau und bei Projekt-Dokumenten. Positionen einzeln auf mehrere Projekte verteilen.
