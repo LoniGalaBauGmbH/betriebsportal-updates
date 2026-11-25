@@ -1,1 +1,1 @@
-Karte überarbeitet: keine Trennlinien mehr, nutzt die ganze Fläche, Zoom mit dem Mausrad.
+Neu: Auswertung je Projekt. Das Portal erkennt selbst, für welches Projekt ein Fahrzeug unterwegs war, und zeigt Kilometer, Fahrzeit, Zeit vor Ort und Fahrtkosten. Unbekannte Orte einmal zuordnen – das Portal merkt es sich.
