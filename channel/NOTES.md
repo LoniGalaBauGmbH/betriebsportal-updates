@@ -1,1 +1,1 @@
-Neu: Auswertung je Projekt. Das Portal erkennt selbst, für welches Projekt ein Fahrzeug unterwegs war, und zeigt Kilometer, Fahrzeit, Zeit vor Ort und Fahrtkosten. Unbekannte Orte einmal zuordnen – das Portal merkt es sich.
+Neu: Notizzettel unten rechts mit den eigenen offenen Aufgaben. Monatsbericht je Projekt zum Drucken oder als PDF (Projekt → Zeiten). In der Fahrzeug-Auswertung schlägt das Portal für unbekannte Orte das passende Projekt vor.
