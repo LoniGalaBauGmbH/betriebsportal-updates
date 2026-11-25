@@ -1,1 +1,1 @@
-Neu: Notizzettel unten rechts mit den eigenen offenen Aufgaben. Monatsbericht je Projekt zum Drucken oder als PDF (Projekt → Zeiten). In der Fahrzeug-Auswertung schlägt das Portal für unbekannte Orte das passende Projekt vor.
+Neu: Rechnungen. Das Portal liest PDF- und E-Rechnungen selbst, ordnet die Positionen den Projekten zu (auch mehrere Projekte in einer Rechnung), prüft die Summen und berechnet den Einkauf je Projekt. Neuer Menüpunkt Rechnungen, im Projekt der Reiter Einkauf.
