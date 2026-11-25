@@ -1,1 +1,1 @@
-Rechnungen, deren Positionen auf mehrere Projekte verteilt sind, erscheinen bei jedem dieser Projekte unter Dokumente – mit dem Anteil des Projekts.
+Rechnungen im Leistungsverzeichnis-Aufbau werden richtig gelesen (Ordnungszahlen, Überträge, Nachlass, Abschlagsrechnung). Neu: Eingangs- und Ausgangsrechnungen – eigene Rechnungen an Kunden zählen im Projekt als abgerechnet, nicht als Einkauf.
