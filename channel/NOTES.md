@@ -1,1 +1,1 @@
-Rechnungen im Leistungsverzeichnis-Aufbau werden richtig gelesen (Ordnungszahlen, Überträge, Nachlass, Abschlagsrechnung). Neu: Eingangs- und Ausgangsrechnungen – eigene Rechnungen an Kunden zählen im Projekt als abgerechnet, nicht als Einkauf.
+Rechnungserkennung deutlich erweitert: Sammelrechnungen mit Lieferscheinen (ganzer Beleg mit einem Klick zum Projekt), Leistungsverzeichnis-Aufbau, Rabattspalten, Summen in Tabellenform, Formular-Layouts, Wiegescheine. Texterkennung gewinnt verlorene Kommas zurück. Tippfehler in der Kommission werden verziehen.
