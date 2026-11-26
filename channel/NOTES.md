@@ -1,1 +1,1 @@
-Rechnungserkennung deutlich erweitert: Sammelrechnungen mit Lieferscheinen (ganzer Beleg mit einem Klick zum Projekt), Leistungsverzeichnis-Aufbau, Rabattspalten, Summen in Tabellenform, Formular-Layouts, Wiegescheine. Texterkennung gewinnt verlorene Kommas zurück. Tippfehler in der Kommission werden verziehen.
+Lieferanten: Schreibvarianten desselben Lieferanten werden zusammengezählt. Namen in einer Rechnung berichtigen und bei allen Rechnungen der Firma übernehmen; das Portal merkt sich die Berichtigung und schlägt bekannte Lieferanten vor.
