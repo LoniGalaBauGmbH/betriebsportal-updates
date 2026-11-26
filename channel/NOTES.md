@@ -1,1 +1,1 @@
-Lieferanten: Schreibvarianten desselben Lieferanten werden zusammengezählt. Namen in einer Rechnung berichtigen und bei allen Rechnungen der Firma übernehmen; das Portal merkt sich die Berichtigung und schlägt bekannte Lieferanten vor.
+Positionen einer Rechnung lassen sich über den Papierkorb rechts löschen. Die Texterkennung liest Sammelrechnungen, Schlussrechnungen und Rechnungen mit Summentabelle auch als Scan zuverlässiger; Lieferant wird aus der Absenderzeile gelesen.
